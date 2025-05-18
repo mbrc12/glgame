@@ -25,7 +25,6 @@ class Shader {
     std::map<std::string, std::array<GLfloat, 4>> vec4_uniforms;
     std::map<std::string, std::vector<GLfloat>> vec4_array_uniforms;
 
-
   public:
     Shader();
     ~Shader();

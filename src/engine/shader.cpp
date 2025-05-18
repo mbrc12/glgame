@@ -1,5 +1,4 @@
 #include "engine/shader.hpp"
-#include "glad/glad.h"
 #include "common.hpp"
 #include <cassert>
 #include <ranges>
@@ -10,21 +9,29 @@ constexpr int MAX_INFO_LOG_SIZE = 1024;
 
 constexpr const char *DEFAULT_VERTEX_SHADER = R"(
 #version 330 core
-layout(location = 0) in vec3 aPos;
+layout(location = 0) in vec3 v_pos;
+layout(location = 1) in vec2 v_tex_coord;
+
+out vec2 tex_coord;
 
 void main() {
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = vec4(v_pos, 1.0);
+    tex_coord = v_tex_coord;
 }
 )";
 
 constexpr const char *DEFAULT_FRAGMENT_SHADER = R"(
 #version 330 core
-out vec4 FragColor;
-uniform vec4 ourColor;
+out vec4 color;
+
+in vec2 tex_coord;
+
+uniform sampler2D texture0;
 
 void main() {
-    FragColor = ourColor;
-})";
+    color = texture(texture0, tex_coord);
+}
+)";
 
 // Helper functions
 GLint getAttributeLocation(GLuint program, const std::string &name) {

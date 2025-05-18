@@ -1,10 +1,11 @@
-#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "common.hpp"
+#include "engine/shader.hpp"
+#include "engine/texture.hpp"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
@@ -25,16 +26,15 @@ int main() {
 
     float bg_color[4] = {0.1, 0.4, 0.2, 1.0};
     glClearColor(bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     double fps = 0.f;
     float last_time = glfwGetTime();
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f, 2.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f, 0.0f, 2.0f,
+        0.5f, 0.5f, 0.0f, 2.0f, 2.0f,
     };
 
     uint VBO;
@@ -59,8 +59,17 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    Engine::Texture texture("assets/textures/crate-texture.jpg");
+    texture.setWrap(Engine::TextureWrap::MirroredRepeat);
+
+    Engine::Shader shader;
+    shader.build();
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
@@ -81,6 +90,7 @@ int main() {
         imguiEnd();
 
         glBindVertexArray(VAO);
+        shader.use();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
@@ -143,11 +153,18 @@ int init() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 
-    DBG("vendor: " << glGetString(GL_VENDOR) << "\nversion: " << glGetString(GL_VERSION) << "\nshader: "
+    DBG("vendor: " << glGetString(GL_VENDOR) << "\nversion: " << glGetString(GL_VERSION) << 
+        "\nshader: "
                    << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\nrenderer: " << glGetString(GL_RENDERER)
                    << "\nimgui: " << IMGUI_VERSION << "\nglfw: " << glfwGetVersionString());
 
     glViewport(0, 0, WIDTH, HEIGHT);
+
+    // Enable blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     return 0;
 }

@@ -17,6 +17,7 @@ set(IMGUI_FILES
 
 set(ENGINE_FILES
     src/engine/shader.cpp
+    src/engine/texture.cpp
 )
 
 set(GAME_FILES
@@ -41,6 +42,7 @@ set(INCLUDE_DIRS
 	deps/imgui/
 	deps/imgui/backends/
     deps/glm/
+    deps/stb/
 )
 
 add_executable(main ${SOURCE_FILES})
@@ -56,3 +58,4 @@ set(LIBS
 )
 
 target_link_libraries(main PRIVATE ${LIBS})
+file(COPY assets DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -15,18 +15,20 @@ set(IMGUI_FILES
 	deps/imgui/backends/imgui_impl_opengl3.cpp
 )
 
+set(DEPENDENCY_FILES
+    deps/glad/src/glad.c
+    ${IMGUI_FILES}
+)
+
 set(ENGINE_FILES
     src/engine/shader.cpp
     src/engine/texture.cpp
+    src/engine/mesh.cpp
 )
 
 set(GAME_FILES
     src/main.cpp
-)
-
-set(DEPENDENCY_FILES
-    deps/glad/src/glad.c
-    ${IMGUI_FILES}
+    src/common.cpp
 )
 
 set(SOURCE_FILES

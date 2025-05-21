@@ -25,7 +25,7 @@ int main() {
         return -1;
     }
 
-    float bg_color[4] = {0.1, 0.4, 0.2, 1.0};
+    float bg_color[4] = {0.01, 0.02, 0.03, 1.0};
     glClearColor(bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
 
     double fps = 0.f;
@@ -39,11 +39,11 @@ int main() {
         {-0.5f, 0.5f, 0.0f},
     });
 
-    mesh.setAssociatedData<glm::vec3>(1, {
-        {0.f, 0.f, 0.f},
-        {1.f, 0.f, 0.f},
-        {0.5f, 1.f, 0.f},
-        {0.f, 0.f, 1.f},
+    mesh.setAssociatedData<glm::vec2>(1, {
+        {0.f, 0.f},
+        {1.f, 0.f},
+        {1.f, 1.f},
+        {0.f, 1.f},
     });
 
     mesh.setElementBuffer({
@@ -76,6 +76,7 @@ int main() {
         imguiEnd();
 
         shader.use();
+        texture.bind();
         mesh.draw();
 
         // glBindVertexArray(VAO);
@@ -105,7 +106,14 @@ void imguiEnd() {
 }
 
 void onResize(GLFWwindow *window, int width, int height) {
-    glViewport(0, 0, width, height);
+    float scale = std::min(1.0 * width/WIDTH, 1.0 * height/HEIGHT);
+    auto width_ = static_cast<size_t>(std::round(WIDTH * scale));
+    auto height_ = static_cast<size_t>(std::round(HEIGHT * scale));
+
+    auto x_ = (width - width_) / 2;
+    auto y_ = (height - height_) / 2;
+
+    glViewport(x_, y_, width_, height_);
     DBG("window resized to " << width << "x" << height);
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);

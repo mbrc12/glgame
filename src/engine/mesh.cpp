@@ -31,7 +31,7 @@ void Mesh::setElementBuffer(const std::initializer_list<uint> &data, MeshType ty
 }
 
 void Mesh::draw() {
-    setup();
+    transferToGPU();
 
     auto primitive_type = static_cast<GLenum>(type);
     glBindVertexArray(vao);
@@ -45,7 +45,7 @@ void Mesh::draw() {
     glBindVertexArray(0);
 }
 
-void Mesh::setup() {
+void Mesh::transferToGPU() {
     if (!buffer.empty()) {
         return;
     }

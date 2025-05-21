@@ -78,10 +78,10 @@ class Mesh {
 
     std::vector<std::variant<std::vector<glm::vec2>, std::vector<glm::vec3>, std::vector<glm::vec4>>> store;
 
-    void setup();
-
     std::vector<uint> element_buffer;
     std::vector<float> buffer;
+
+    void transferToGPU();
 };
 
 }; // namespace Engine

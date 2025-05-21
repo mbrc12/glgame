@@ -46,6 +46,11 @@ void Texture::load(const std::string &path) {
     loaded = true;
 }
 
+void Texture::bind(GLuint index) {
+    glActiveTexture(GL_TEXTURE0 + index);
+    glBindTexture(GL_TEXTURE_2D, texture);
+}
+
 void Texture::setWrap(TextureWrap wrap) {
     this->wrap = wrap;
     if (loaded) {

@@ -23,6 +23,7 @@ class Texture {
 
     void load(const std::string &path);
     void setWrap(TextureWrap wrap);
+    void bind(GLuint index = 0);
 };
 
 }; // namespace Engine

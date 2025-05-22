@@ -64,6 +64,8 @@ class Mesh {
         setAssociatedData<T>(index, data.begin(), data.size());
     }
 
+    size_t getVertexCount();
+
     void setElementBuffer(const uint *data, size_t count, MeshType type = MeshType::Triangles);
 
     void setElementBuffer(const std::initializer_list<uint> &data, MeshType type = MeshType::Triangles);

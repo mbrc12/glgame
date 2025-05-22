@@ -45,6 +45,20 @@ void Mesh::draw() {
     glBindVertexArray(0);
 }
 
+size_t Mesh::getVertexCount() {
+    vertex_count = std::numeric_limits<size_t>::max();
+    for (size_t field = 0; field < store.size(); field++) {
+        size_t size = std::visit([](auto &v) { return v.size(); }, store[field]);
+        vertex_count = std::min(vertex_count, size);
+    }
+    
+    if (vertex_count == std::numeric_limits<size_t>::max()) {
+        vertex_count = 0;
+    }
+
+    return vertex_count;
+}
+
 void Mesh::transferToGPU() {
     if (!buffer.empty()) {
         return;
@@ -52,12 +66,7 @@ void Mesh::transferToGPU() {
 
     size_t total_width = std::accumulate(widths.begin(), widths.end(), 0);
 
-    vertex_count = std::numeric_limits<size_t>::max();
-    for (size_t field = 0; field < store.size(); field++) {
-        size_t size = std::visit([](auto &v) { return v.size(); }, store[field]);
-        vertex_count = std::min(vertex_count, size);
-    }
-
+    vertex_count = getVertexCount();
     buffer.resize(vertex_count * total_width);
 
     size_t offset = 0;
@@ -87,14 +96,11 @@ void Mesh::transferToGPU() {
 
     offset = 0;
 
-    DBG("buffer " << buffer);
-
     for (size_t field = 0; field < store.size(); ++field) {
         glVertexAttribPointer(field, widths[field], GL_FLOAT, GL_FALSE, total_width * sizeof(float),
                               (void *)(offset * sizeof(float)));
         glEnableVertexAttribArray(field);
         offset += widths[field];
-        DBG("field " << field << " offset: " << offset);
     }
 
     glBindVertexArray(0);

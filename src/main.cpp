@@ -42,6 +42,7 @@ int main() {
 
     Engine::Mesh cube = Engine::cuboidMesh(5.f);
     Engine::Mesh platform = Engine::cuboidMesh(40.f, 2.f, 20.f);
+    Engine::Mesh sphere = Engine::sphereMesh(10.f, 50);
 
     std::uniform_real_distribution<float> uniform(0.f, 1.f);
     auto tex_coords = std::vector<glm::vec2>();
@@ -51,8 +52,16 @@ int main() {
         return glm::vec2(x, y);
     });
 
-    cube.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
+    // cube.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
     platform.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
+
+    tex_coords.clear();
+    std::generate_n(std::back_inserter(tex_coords), sphere.getVertexCount(), [&]() {
+        float x = uniform(rng);
+        float y = uniform(rng);
+        return glm::vec2(x, y);
+    });
+    sphere.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
 
     Engine::Texture crate_texture("assets/textures/crate-texture.jpg");
     crate_texture.setWrap(Engine::TextureWrap::MirroredRepeat);
@@ -91,7 +100,10 @@ int main() {
         shader.setMat4Uniform("transform", perspective * transform);
 
         crate_texture.bind();
-        cube.draw();
+        // cube.draw();
+        // transform = glm::scale(transform, glm::vec3(1.f, 1.f, 1.f) * 8.f);
+        shader.setMat4Uniform("transform", perspective * transform);
+        sphere.draw();
 
         transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.f, -15.f, -20.f));
         shader.setMat4Uniform("transform", perspective * transform);

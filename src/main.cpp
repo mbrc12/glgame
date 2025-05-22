@@ -3,16 +3,22 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <random>
 #include "common.hpp"
 #include "engine/mesh.hpp"
 #include "engine/shader.hpp"
+#include "engine/shapes.hpp"
 #include "engine/texture.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
 constexpr const char *GAME_NAME = "GLGame";
 
 GLFWwindow *window;
+
+static auto rng = std::minstd_rand();
 
 void onResize(GLFWwindow *window, int width, int height);
 int init();
@@ -21,41 +27,43 @@ void imguiBegin();
 void imguiEnd();
 
 int main() {
+    std::random_device rd;
+    rng.seed(rd());
+
     if (init() != 0) {
         return -1;
     }
 
-    float bg_color[4] = {0.01, 0.02, 0.03, 1.0};
+    float bg_color[4] = {0.02, 0.04, 0.06, 1.0};
     glClearColor(bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
 
     double fps = 0.f;
     float last_time = glfwGetTime();
 
-    Engine::Mesh mesh;
-    mesh.setVertexPositions<glm::vec3>({
-        {-0.5f, -0.5f, 0.0f},
-        {0.5f, -0.5f, 0.0f},
-        {0.5f, 0.5f, 0.0f},
-        {-0.5f, 0.5f, 0.0f},
+    Engine::Mesh cube = Engine::cuboidMesh(5.f);
+    Engine::Mesh platform = Engine::cuboidMesh(40.f, 2.f, 20.f);
+
+    std::uniform_real_distribution<float> uniform(0.f, 1.f);
+    auto tex_coords = std::vector<glm::vec2>();
+    std::generate_n(std::back_inserter(tex_coords), 8, [&]() {
+        float x = uniform(rng);
+        float y = uniform(rng);
+        return glm::vec2(x, y);
     });
 
-    mesh.setAssociatedData<glm::vec2>(1, {
-        {0.f, 0.f},
-        {1.f, 0.f},
-        {1.f, 1.f},
-        {0.f, 1.f},
-    });
+    cube.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
+    platform.setAssociatedData<glm::vec2>(1, tex_coords.data(), tex_coords.size());
 
-    mesh.setElementBuffer({
-        0, 1, 2,
-        0, 2, 3,
-    });
+    Engine::Texture crate_texture("assets/textures/crate-texture.jpg");
+    crate_texture.setWrap(Engine::TextureWrap::MirroredRepeat);
 
-    Engine::Texture texture("assets/textures/crate-texture.jpg");
-    texture.setWrap(Engine::TextureWrap::MirroredRepeat);
+    Engine::Texture checkerboard_texture("assets/textures/checkerboard.png");
+    checkerboard_texture.setWrap(Engine::TextureWrap::MirroredRepeat);
 
     Engine::Shader shader;
     shader.build();
+
+    auto perspective = glm::perspective(glm::radians(90.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
@@ -64,7 +72,7 @@ int main() {
         fps = fps * 0.9 + 0.1 / (time - last_time);
         last_time = time;
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         imguiBegin();
 
@@ -76,11 +84,20 @@ int main() {
         imguiEnd();
 
         shader.use();
-        texture.bind();
-        mesh.draw();
+    
+        auto transform = glm::identity<glm::mat4>();
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, -20.f));
+        transform = glm::rotate(transform, float(glfwGetTime()), glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.setMat4Uniform("transform", perspective * transform);
 
-        // glBindVertexArray(VAO);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        crate_texture.bind();
+        cube.draw();
+
+        transform = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.f, -15.f, -20.f));
+        shader.setMat4Uniform("transform", perspective * transform);
+
+        checkerboard_texture.bind();
+        platform.draw();
 
         glfwSwapBuffers(window);
 
@@ -159,6 +176,9 @@ int init() {
     // Enable blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

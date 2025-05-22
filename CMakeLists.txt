@@ -24,6 +24,7 @@ set(DEPENDENCY_FILES
 set(ENGINE_FILES
     src/engine/mesh.cpp
     src/engine/shader.cpp
+    src/engine/shapes.cpp
     src/engine/texture.cpp
 )
 

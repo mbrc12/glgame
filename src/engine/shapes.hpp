@@ -8,4 +8,4 @@ Mesh sphereMesh(float radius, size_t splits = 10);
 
 // Mesh randomShape(size_t splits = 10);
 
-}
+} // namespace Engine

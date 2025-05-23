@@ -27,29 +27,20 @@ Mesh cuboidMesh(float width, float height, float depth) {
     });
 
     mesh.setAssociatedData<glm::vec2>(1, {
-        {0.f, 0.f},
-        {0.f, 1.f},
-        {1.f, 0.f},
-        {1.f, 1.f},
-        {1.f, 0.f},
-        {1.f, 0.f},
-        {1.f, 1.f},
-        {1.f, 0.f},
-    });
+                                             {0.f, 0.f},
+                                             {0.f, 1.f},
+                                             {1.f, 0.f},
+                                             {1.f, 1.f},
+                                             {1.f, 0.f},
+                                             {1.f, 0.f},
+                                             {1.f, 1.f},
+                                             {1.f, 0.f},
+                                         });
 
     mesh.setElementBuffer({
-        0b000, 0b001, 0b011,
-        0b000, 0b001, 0b101,
-        0b000, 0b010, 0b011,
-        0b000, 0b010, 0b110,
-        0b000, 0b100, 0b101,
-        0b000, 0b100, 0b110,
-        0b001, 0b011, 0b111,
-        0b001, 0b101, 0b111,
-        0b010, 0b011, 0b111,
-        0b010, 0b110, 0b111,
-        0b100, 0b101, 0b111,
-        0b100, 0b110, 0b111,
+        0b000, 0b001, 0b011, 0b000, 0b001, 0b101, 0b000, 0b010, 0b011, 0b000, 0b010, 0b110,
+        0b000, 0b100, 0b101, 0b000, 0b100, 0b110, 0b001, 0b011, 0b111, 0b001, 0b101, 0b111,
+        0b010, 0b011, 0b111, 0b010, 0b110, 0b111, 0b100, 0b101, 0b111, 0b100, 0b110, 0b111,
 
     });
 
@@ -122,14 +113,14 @@ Mesh sphereMesh(float radius, size_t splits) {
 //         indices.push_back({b, c, d});
 //         indices.push_back({c, a, d});
 //     }
-//     
+//
 //     auto mesh = Mesh();
 //     mesh.setVertexPositions<glm::vec3>(vertices.data(), vertices.size());
-//     
+//
 //     auto indices_flat = indices | std::ranges::views::join | std::ranges::to<std::vector<GLuint>>();
 //     mesh.setElementBuffer(indices_flat.data(), indices_flat.size());
 //
 //     return mesh;
 // }
 //
-}
+} // namespace Engine

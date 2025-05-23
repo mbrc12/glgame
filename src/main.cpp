@@ -14,15 +14,16 @@
 
 constexpr int WIDTH = 640;
 constexpr int HEIGHT = 480;
-constexpr const char *GAME_NAME = "GLGame";
+constexpr const char* GAME_NAME = "GLGame";
 float HORIZONTAL_SENSITIVITY = 0.0005f;
 float VERTICAL_SENSITIVITY = 0.0005f;
+float camera_exponent = 1.f;
 
-GLFWwindow *window;
+GLFWwindow* window;
 
 static auto rng = std::minstd_rand();
 
-void onResize(GLFWwindow *window, int width, int height);
+void onResize(GLFWwindow* window, int width, int height);
 int init();
 void cleanup();
 void imguiBegin();
@@ -68,8 +69,8 @@ int main() {
     Engine::Texture crate_texture("assets/textures/crate-texture.jpg");
     crate_texture.setWrap(Engine::TextureWrap::MirroredRepeat);
 
-    Engine::Texture checkerboard_texture("assets/textures/checkerboard.png");
-    checkerboard_texture.setWrap(Engine::TextureWrap::MirroredRepeat);
+    Engine::Texture checkerboard("assets/textures/checkerboard.png");
+    checkerboard.setWrap(Engine::TextureWrap::MirroredRepeat);
 
     Engine::Shader shader;
     shader.build();
@@ -81,7 +82,7 @@ int main() {
     static bool move = true;
     static bool first_motion = true;
 
-    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double x, double y) {
+    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
         static double last_x = 0.f;
         static double last_y = 0.f;
 
@@ -90,10 +91,9 @@ int main() {
 
         last_x = x;
         last_y = y;
- 
-        ImGui::GetIO().MousePos = ImVec2(x, y);
 
         if (!move) {
+            ImGui::GetIO().MousePos = ImVec2(x, y);
             return;
         }
 
@@ -105,15 +105,13 @@ int main() {
         float new_rot_x = rot_x + dy * VERTICAL_SENSITIVITY;
         float new_rot_y = rot_y + dx * HORIZONTAL_SENSITIVITY;
 
-        if (std::abs(new_rot_x) + std::abs(new_rot_y) > PI/2) {
+        if (std::pow(std::abs(new_rot_x), camera_exponent) + std::pow(std::abs(new_rot_y), camera_exponent) >
+            std::pow(PI / 2, camera_exponent)) {
             return;
         }
-        
 
         rot_x = new_rot_x;
         rot_y = new_rot_y;
-
-
     });
 
     auto projection = [&]() {
@@ -122,9 +120,8 @@ int main() {
         camera = glm::rotate(glm::identity<glm::mat4>(), rot_y, glm::vec3(0.f, 1.f, 0.f));
         camera = glm::rotate(camera, rot_x, glm::vec3(1.f, 0.f, 0.f));
 
-        static auto perspective = glm::perspective(glm::radians(45.0f), (float)WIDTH/(float)HEIGHT, 0.1f, 1000.0f);
-        return perspective * glm::inverse(camera) *
-               glm::translate(glm::identity<glm::mat4>(), -camera_position);
+        static auto perspective = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 1000.0f);
+        return perspective * glm::inverse(camera) * glm::translate(glm::identity<glm::mat4>(), -camera_position);
     };
 
     bool last_frame = false;
@@ -146,6 +143,7 @@ int main() {
         ImGui::Text("fps: %.2f", fps);
         ImGui::SliderFloat("HORIZONTAL_SENSITIVITY", &HORIZONTAL_SENSITIVITY, 0.f, 0.001f, "%.5f");
         ImGui::SliderFloat("VERTICAL_SENSITIVITY", &VERTICAL_SENSITIVITY, 0.f, 0.001f, "%.5f");
+        ImGui::SliderFloat("camera_exponent", &camera_exponent, 0.1f, 5.f, "%.2f");
 
         imguiEnd();
 
@@ -165,7 +163,7 @@ int main() {
         transform = glm::identity<glm::mat4>();
         shader.setMat4Uniform("transform", projection() * transform);
 
-        checkerboard_texture.bind();
+        checkerboard.bind();
         platform.draw();
 
         glfwSwapBuffers(window);
@@ -177,10 +175,11 @@ int main() {
 
         if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !last_frame) {
             move = !move;
-            if (move == false) first_motion = true;
+            if (move == false)
+                first_motion = true;
         }
-        last_frame = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
 
+        last_frame = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
     }
 
     cleanup();
@@ -198,7 +197,7 @@ void imguiEnd() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void onResize(GLFWwindow *window, int width = -1, int height = -1) {
+void onResize(GLFWwindow* window, int width = -1, int height = -1) {
     if (width == -1 || height == -1) {
         glfwGetWindowSize(window, &width, &height);
     }
@@ -238,7 +237,7 @@ int init() {
         glfwTerminate();
         return -1;
     }
-   
+
     DBG("window created: " << mode->width << "x" << mode->height);
 
     glfwSetFramebufferSizeCallback(window, onResize);
@@ -258,7 +257,7 @@ int init() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     io.MouseDrawCursor = true;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -267,8 +266,6 @@ int init() {
     DBG("vendor: " << glGetString(GL_VENDOR) << "\nversion: " << glGetString(GL_VERSION) << "\nshader: "
                    << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\nrenderer: " << glGetString(GL_RENDERER)
                    << "\nimgui: " << IMGUI_VERSION << "\nglfw: " << glfwGetVersionString());
-
-
 
     // Enable blending
     glEnable(GL_BLEND);

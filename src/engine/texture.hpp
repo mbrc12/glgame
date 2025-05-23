@@ -18,10 +18,10 @@ class Texture {
 
   public:
     explicit Texture();
-    explicit Texture(const std::string &path);
+    explicit Texture(const std::string& path);
     ~Texture();
 
-    void load(const std::string &path);
+    void load(const std::string& path);
     void setWrap(TextureWrap wrap);
     void bind(GLuint index = 0);
 };

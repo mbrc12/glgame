@@ -10,7 +10,7 @@ namespace Engine {
 
 constexpr int MAX_INFO_LOG_SIZE = 1024;
 
-constexpr const char *DEFAULT_VERTEX_SHADER = R"(
+constexpr const char* DEFAULT_VERTEX_SHADER = R"(
 #version 330 core
 layout(location = 0) in vec3 v_pos;
 layout(location = 1) in vec2 v_tex_coord;
@@ -24,7 +24,7 @@ void main() {
 }
 )";
 
-constexpr const char *DEFAULT_FRAGMENT_SHADER = R"(
+constexpr const char* DEFAULT_FRAGMENT_SHADER = R"(
 #version 330 core
 out vec4 color;
 
@@ -38,7 +38,7 @@ void main() {
 )";
 
 // Helper functions
-GLint getAttributeLocation(GLuint program, const std::string &name) {
+GLint getAttributeLocation(GLuint program, const std::string& name) {
     GLint location = glGetAttribLocation(program, name.data());
     if (location == -1) {
         DBG("attribute " << name << " not found in shader program, or is invalid attribute name");
@@ -47,7 +47,7 @@ GLint getAttributeLocation(GLuint program, const std::string &name) {
     return location;
 }
 
-GLint getUniformLocation(GLuint program, const std::string &name) {
+GLint getUniformLocation(GLuint program, const std::string& name) {
     GLint location = glGetUniformLocation(program, name.data());
     if (location == -1) {
         DBG("uniform " << name << " not found in shader program, or is invalid uniform name");
@@ -62,11 +62,11 @@ Shader::Shader()
 
 Shader::~Shader() { glDeleteProgram(shader_program); }
 
-void Shader::setVertexShader(const std::string &vertex_shader_source) {
+void Shader::setVertexShader(const std::string& vertex_shader_source) {
     this->vertex_shader_source = std::string(vertex_shader_source);
 }
 
-void Shader::setFragmentShader(const std::string &fragment_shader_source) {
+void Shader::setFragmentShader(const std::string& fragment_shader_source) {
     this->fragment_shader_source = std::string(fragment_shader_source);
 }
 
@@ -120,44 +120,44 @@ void Shader::build() {
     is_built = true;
 }
 
-void Shader::setFloatUniform(const std::string &name, float value) {
+void Shader::setFloatUniform(const std::string& name, float value) {
     GLint location = getUniformLocation(shader_program, name);
     glUniform1f(location, value);
 }
 
-void Shader::setFloatArrayUniform(const std::string &name, const float *values, size_t size) {
+void Shader::setFloatArrayUniform(const std::string& name, const float* values, size_t size) {
     GLint location = getUniformLocation(shader_program, name);
     glUniform1fv(location, static_cast<GLsizei>(size), values);
 }
 
-void Shader::setVec3Uniform(const std::string &name, const glm::vec3 value) {
+void Shader::setVec3Uniform(const std::string& name, const glm::vec3 value) {
     GLint location = getUniformLocation(shader_program, name);
     glUniform3f(location, value.x, value.y, value.z);
 }
 
-void Shader::setVec3ArrayUniform(const std::string &name, const glm::vec3 *values, size_t size) {
+void Shader::setVec3ArrayUniform(const std::string& name, const glm::vec3* values, size_t size) {
     auto data = std::span{values, size} |
-                std::views::transform([](const glm::vec3 &v) { return std::array<GLfloat, 3>{v.x, v.y, v.z}; }) |
+                std::views::transform([](const glm::vec3& v) { return std::array<GLfloat, 3>{v.x, v.y, v.z}; }) |
                 std::views::join | std::ranges::to<std::vector<GLfloat>>();
     GLint location = getUniformLocation(shader_program, name);
     glUniform4fv(location, static_cast<GLsizei>(data.size()), data.data());
 }
 
-void Shader::setVec4Uniform(const std::string &name, const glm::vec4 value) {
+void Shader::setVec4Uniform(const std::string& name, const glm::vec4 value) {
     GLint location = getUniformLocation(shader_program, name);
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
-void Shader::setVec4ArrayUniform(const std::string &name, const glm::vec4 *values, size_t size) {
+void Shader::setVec4ArrayUniform(const std::string& name, const glm::vec4* values, size_t size) {
     auto data = std::span{values, size} |
-                std::views::transform([](const glm::vec4 &v) { return std::array<GLfloat, 4>{v.x, v.y, v.z, v.w}; }) |
+                std::views::transform([](const glm::vec4& v) { return std::array<GLfloat, 4>{v.x, v.y, v.z, v.w}; }) |
                 std::views::join | std::ranges::to<std::vector<GLfloat>>();
 
     GLint location = getUniformLocation(shader_program, name);
     glUniform4fv(location, static_cast<GLsizei>(data.size()), data.data());
 }
 
-void Shader::setMat4Uniform(const std::string &name, const glm::mat4 &value) {
+void Shader::setMat4Uniform(const std::string& name, const glm::mat4& value) {
     GLint location = getUniformLocation(shader_program, name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }

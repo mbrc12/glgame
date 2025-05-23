@@ -8,7 +8,7 @@ namespace Engine {
 
 Texture::Texture() : loaded(false) {}
 
-Texture::Texture(const std::string &path) : loaded(false) { load(path); }
+Texture::Texture(const std::string& path) : loaded(false) { load(path); }
 
 Texture::~Texture() {
     if (loaded) {
@@ -16,9 +16,9 @@ Texture::~Texture() {
     }
 }
 
-void Texture::load(const std::string &path) {
+void Texture::load(const std::string& path) {
     int width, height, channels;
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!data) {
         DBG("Failed to load texture: " << path);
         assert(false);
